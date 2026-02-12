@@ -80,7 +80,7 @@ if uploaded_file is not None:
         elif model_option == "Random Forest":
             model = RandomForestClassifier(n_estimators=100)
         elif model_option == "XGBoost":
-            model = XGBClassifier(eval_metric='logloss')
+            model = XGBClassifier(n_estimators=50, max_depth=3,eval_metric='logloss')
 
         # Scaling for distance-based models
         if model_option in ["Logistic Regression", "kNN"]:

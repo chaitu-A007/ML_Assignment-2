@@ -70,4 +70,57 @@ if uploaded_file is not None:
 
         # Model Initialization
         if model_option == "Logistic Regression":
-            model = LogisticRegression(max_)
+            model = LogisticRegression(max_iter=1000)
+        elif model_option == "Decision Tree":
+            model = DecisionTreeClassifier(max_depth=5)
+        elif model_option == "kNN":
+            model = KNeighborsClassifier()
+        elif model_option == "Naive Bayes":
+            model = GaussianNB()
+        elif model_option == "Random Forest":
+            model = RandomForestClassifier(n_estimators=100)
+        elif model_option == "XGBoost":
+            model = XGBClassifier(eval_metric='logloss')
+
+        # Scaling for distance-based models
+        if model_option in ["Logistic Regression", "kNN"]:
+            scaler = StandardScaler()
+            X_train = scaler.fit_transform(X_train)
+            X_test = scaler.transform(X_test)
+
+        # Train and Predict
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        y_probs = model.predict_proba(X_test)[:, 1]
+
+        # --- STEP 3: DISPLAY METRICS ---
+        st.subheader(f"📊 {model_option} Evaluation Metrics")
+        m1, m2, m3, m4, m5, m6 = st.columns(6)
+        m1.metric("Accuracy", f"{accuracy_score(y_test, y_pred):.3f}")
+        m2.metric("AUC", f"{roc_auc_score(y_test, y_probs):.3f}")
+        m3.metric("Precision", f"{precision_score(y_test, y_pred):.3f}")
+        m4.metric("Recall", f"{recall_score(y_test, y_pred):.3f}")
+        m5.metric("F1", f"{f1_score(y_test, y_pred):.3f}")
+        m6.metric("MCC", f"{matthews_corrcoef(y_test, y_pred):.3f}")
+
+        # --- STEP 4: VISUALIZATION ---
+        st.divider()
+        col_left, col_right = st.columns([1, 1.5])
+
+        with col_left:
+            st.write("### Confusion Matrix")
+            # Optimized size for professional UI
+            fig, ax = plt.subplots(figsize=(4, 3)) 
+            sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt='d', cmap='Blues', ax=ax)
+            plt.ylabel('Actual')
+            plt.xlabel('Predicted')
+            st.pyplot(fig, use_container_width=False) 
+
+        with col_right:
+            st.write("### Classification Report")
+            st.text(classification_report(y_test, y_pred))
+
+    else:
+        st.error("The CSV must contain a 'Revenue' target column for evaluation.")
+else:
+    st.info("Waiting for CSV upload... Please upload the dataset in the sidebar to view results.")

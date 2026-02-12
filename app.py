@@ -70,4 +70,4 @@ if uploaded_file is not None:
 
         # Model Initialization
         if model_option == "Logistic Regression":
-            model = LogisticRegression(max_
+            model = LogisticRegression(max_)
